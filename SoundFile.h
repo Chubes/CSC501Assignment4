@@ -1,7 +1,7 @@
 #ifndef SoundFileH
 #define SoundFileH
 
-class CWav
+class SoundFile
 {
 private:
 	
@@ -15,9 +15,8 @@ public:
 	short 	BlockAlign;
 	short 	BitsPerSample;
 	int		DataSize;
-
-	short *signal;
-	int SignalSize;
+	short	*signal;
+	int		signalSize;
 	char* 	Data;
 public:
 
