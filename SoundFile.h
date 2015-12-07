@@ -6,18 +6,18 @@ class SoundFile
 private:
 	
 public:
-	int 	ChunkSize;
+	int 	chunkSize;
 	int		SubChunk1Size;
-	short 	Format;
-	short 	Channels;
-	int   	SampleRate;
-	int   	ByteRate;
-	short 	BlockAlign;
-	short 	BitsPerSample;
-	int		DataSize;
+	short 	format;
+	short 	channels;
+	int   	sampleRate;
+	int   	byteRate;
+	short 	blockAlign;
+	short 	bitsPerSample;
+	int		dataSize;
 	short	*signal;
 	int		signalSize;
-	char* 	Data;
+	char* 	data;
 public:
 
 	void readInput(char *fileName);

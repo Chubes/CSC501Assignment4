@@ -6,8 +6,15 @@
 #include "SoundFile.h"
 using namespace std;
 
+#define PI					3.14159265358979
+#define TWO_PI     (2.0 * PI)
+#define SWAP(a,b)  tempr=(a);(a)=(b);(b)=tempr
+
+
+
+
 void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample,
-						double outputRate, FILE *outputFile);
+							double outputRate, FILE *outputFile);
 size_t fwriteIntLSB(int data, FILE *stream);
 size_t fwriteShortLSB(short int data, FILE *stream);
 void readInput(char *filename);
@@ -20,9 +27,9 @@ char* IRFileName = NULL;
 char* outputFileName = NULL;
 
 int main(int argc, char *argv[]) {
-	
 
-	
+
+
 	if (argc == 4) {
 		inputFileName = argv[1];
 		IRFileName = argv[2];
@@ -40,20 +47,20 @@ int main(int argc, char *argv[]) {
 	SoundFile *impulse = new SoundFile();
 	impulse->readInput(IRFileName);
 
-	
+
 
 	cout << "Input Signal: " << input->signalSize << ", Impulse Size: " << impulse->signalSize << endl;
 	int outputSize = input->signalSize + impulse->signalSize - 1;
 	float *outputSignal = new float[outputSize];
-	
+
 	float *x = new float[input->signalSize];
 	for (int i = 0; i < input->signalSize; i++) {
-		x[i] = (float)input->signal[i]/32768;
+		x[i] = (float)input->signal[i] / 32768;
 	}
-	
+
 	float *h = new float[impulse->signalSize];
 	for (int i = 0; i < impulse->signalSize; i++) {
-		h[i] = (float)impulse->signal[i]/32768;
+		h[i] = (float)impulse->signal[i] / 32768;
 	}
 	convolve(x, input->signalSize, h, impulse->signalSize, outputSignal, outputSize);
 
@@ -61,18 +68,18 @@ int main(int argc, char *argv[]) {
 
 	/*  Calculate the number of sound samples to create,
 	rounding upwards if necessary  */
-	int numSamples = outputSize;
+	int numberOfSamples = outputSize;
 
 
 	/*  Open a binary output file stream for writing */
 	FILE *outputFileStream = fopen(outputFileName, "wb");
 
 	/*  Write the WAVE file header  */
-	writeWaveFileHeader(input->channels, numSamples, input->bitsPerSample,
+	writeWaveFileHeader(input->channels, numberOfSamples, input->bitsPerSample,
 		input->sampleRate, outputFileStream);
 
-	for (i = 0; i < numSamples; i++)
-		fwriteShortLSB(rint(outputSignal[i]*32767*0.9), outputFileStream);
+	for (i = 0; i < numberOfSamples; i++)
+		fwriteShortLSB(rint(outputSignal[i] * 32767 * 0.9), outputFileStream);
 
 
 	/*  Close the output file stream  */
@@ -190,8 +197,8 @@ size_t fwriteShortLSB(short int data, FILE *stream)
 	array[0] = (unsigned char)(data & 0xFF);
 	return fwrite(array, sizeof(unsigned char), 2, stream);
 }
-void convolve(float x[], int N, float h[], int M, float y[], int P){
-	
+void convolve(float x[], int N, float h[], int M, float y[], int P) {
+
 	int n, m;
 	/*	Make sure the output buffer is the right size: P = N + M - 1	*/
 	if (P != (N + M - 1)) {
