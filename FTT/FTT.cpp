@@ -6,7 +6,6 @@
 #include "SoundFile.h"
 using namespace std;
 
-
 #define PI					3.14159265358979
 #define TWO_PI     (2.0 * PI)
 #define SWAP(a,b)  tempr=(a);(a)=(b);(b)=tempr
@@ -14,13 +13,12 @@ using namespace std;
 
 
 
-void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample, double outputRate, FILE *outputFile);
+void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample,
+							double outputRate, FILE *outputFile);
 size_t fwriteIntLSB(int data, FILE *stream);
 size_t fwriteShortLSB(short int data, FILE *stream);
 void readInput(char *filename);
 void four1(double data[], int nn, int isign);
-
-
 SoundFile *input;
 
 char* inputFileName = NULL;
@@ -48,12 +46,6 @@ int main(int argc, char *argv[]) {
 	SoundFile *impulse = new SoundFile();
 	impulse->readInput(IRFileName);
 
-
-
-	cout << "Input Signal: " << input->signalSize << ", Impulse Size: " << impulse->signalSize << endl;
-	int outputSize = input->signalSize + impulse->signalSize - 1;
-	float *outputSignal = new float[outputSize];
-
 	double *x = new double[input->signalSize];
 	for (int i = 0; i < input->signalSize; i++) {
 		x[i] = (double)input->signal[i] / 32768.0;
@@ -63,48 +55,51 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < impulse->signalSize; i++) {
 		h[i] = (double)impulse->signal[i] / 32768;
 	}
-	
-	
+
+
 	int complexSize;
-	if (input->signal > impulse->signalSize) {
+	if (input->signalSize > impulse->signalSize) {
 		complexSize = input->signalSize;
 	}
 	else {
 		complexSize = impulse->signalSize;
 	}
-	
-	int pow = (int)log2(complexsize) + 1;
-	complexSize = 2 * pow(2, pow);
+
+	int power = (int)log2(complexSize) + 1;
+	power = pow(2, power);
+	complexSize = 2 * power;
 
 	double *complexX = new double[complexSize];
 	double *complexH = new double[complexSize];
 	//pad both with zeroes
-	for (i = 0; i < complexSize; i += 2) {
+	for (int i = 0; i < complexSize; i += 2) {
 		complexX[i] = 0.0;
-		complexH[i] = 0.0
+		complexH[i] = 0.0;
 	}
 
-	for (i = 0; i < input->signalSize; i ++) {
+	for (int i = 0; i < input->signalSize; i++) {
 		complexX[2 * i] = x[i];
 	}
 
-	for (i = 0; i < impulse->signalSize; i++) {
+	for (int i = 0; i < impulse->signalSize; i++) {
 		complexH[2 * i] = h[i];
 	}
 	int i;
 
-	four1(complexX, pow, 1);
-	four1(complexH, pow, 1);
+	four1(complexX-1, power, 1);
+	four1(complexH-1, power, 1);
 
 	double *complexY = new double[complexSize];
-	for (i = 0; i < pow2; i++) {
-		complexY[i * 2] = complexX[i] * complexH[i] - complexX[i + 1] * complexH[i + 1];
-		complexY[i * 2 + 1] = complexX[i + 1] * complexH[i] + complexX[i] * complexH[i + 1];
+	for (i = 0; i < power; i += 2) {
+		complexY[i] = complexX[i] * complexH[i] - complexX[i + 1] * complexH[i + 1];
+		complexY[i + 1] = complexX[i + 1] * complexH[i] + complexX[i] * complexH[i + 1];
+		//cout << complexY[i] << "\n";
+		//cout << complexY[i+1] << "\n";
 	}
-	four1(complexY-1, pow, -1);
+	four1(complexY - 1, power, -1);
 	/*  Calculate the number of sound samples to create,
 	rounding upwards if necessary  */
-	int numSamples = outputSize;
+	int numSamples = power;
 
 
 	/*  Open a binary output file stream for writing */
@@ -113,21 +108,32 @@ int main(int argc, char *argv[]) {
 	/*  Write the WAVE file header  */
 	writeWaveFileHeader(input->channels, numSamples, input->bitsPerSample,
 		input->sampleRate, outputFileStream);
-	float maxValInResult = -1.0;
-	for (i = 0; i < numberOfSamples; i++) {
-		if (complexY[i] > maxValInResult)
-			maxValInResult = ComplexY[i];
-	}
-	float maxValInInput = -1.0;
-	for (i = 0; i < numberOfSamples; i++) {
-		if (input->signal[i] > maxValInInput)
-			maxValInInput = input->signal[i];
-	}
+	double maxValInResult = -1.0;
 	for (i = 0; i < numSamples; i++)
-		fwriteShortLSB(rint(complexY[i] * 32767 * 0.9), outputFileStream);
+		if (complexY[i] > maxValInResult)
+			maxValInResult = complexY[i];
+	
+	
+	for (i = 0; i < power; i += 2) {
+		complexY[i] /= (double)power;
+		complexY[i + 1] /= (double)power;
+	}
+	/*double maxValInInput = -1.0;
+	for (i = 0; i < numSamples; i++)
+		if (input->signal[i] > maxValInInput)
+			maxValInInput = input->signal[i];*/
 
+	/*for (i = 0; i < numSamples; i++)
+		fwriteShortLSB((short)(complexY[i] / maxValInResult * maxValInInput), outputFileStream);*/
+	//for (i = 0; i < numSamples; i++) {
+	//	//cout << rint((short)complexY[i] * 32767 * 0.9);
+	//	fwriteShortLSB(rint((short)complexY[i] * 32767), outputFileStream);
+	//}
 
-	/*  Close the output file stream  */
+	for (i = 0; i < numSamples; i++)
+		//cout << (short)complexY[i] << "\n";
+		fwriteShortLSB(rint((short)(complexY[i] * 32767)), outputFileStream);
+	// Close the output file stream  
 	fclose(outputFileStream);
 
 
@@ -256,8 +262,7 @@ size_t fwriteShortLSB(short int data, FILE *stream)
 void four1(double data[], int nn, int isign)
 {
 	unsigned long n, mmax, m, j, istep, i;
-	double wtemp
-		wr, wpr, wpi, wi, theta;
+	double wtemp, wr, wpr, wpi, wi, theta;
 	double tempr, tempi;
 
 	n = nn << 1;
