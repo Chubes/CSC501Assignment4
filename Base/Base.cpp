@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
 	
 
-	cout << "Input Signal: " << input->signalSize << ", Impulse Size: " << impulse->signalSize << endl;
+	
 	int outputSize = input->signalSize + impulse->signalSize - 1;
 	float *outputSignal = new float[outputSize];
 	
