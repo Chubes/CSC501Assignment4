@@ -69,8 +69,8 @@ int main(int argc, char *argv[]) {
 
 	double *complexX = new double[complexSize];
 	double *complexH = new double[complexSize];
-	//pad both with zeroes
-	for (int i = 0; i < complexSize; i += 2) {
+	//pad with zeroes
+	for (int i = 0; i < complexSize; i++) {
 		complexX[i] = 0.0;
 		complexH[i] = 0.0;
 	}
