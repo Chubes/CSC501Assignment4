@@ -55,21 +55,18 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < impulse->signalSize; i++) {
 		h[i] = (float)impulse->signal[i]/32768;
 	}
+
 	convolve(x, input->signalSize, h, impulse->signalSize, outputSignal, outputSize);
 
 	int i;
 
-	/*  Calculate the number of sound samples to create,
-	rounding upwards if necessary  */
+	
 	int numSamples = outputSize;
-
-
 	/*  Open a binary output file stream for writing */
 	FILE *outputFileStream = fopen(outputFileName, "wb");
 
-	/*  Write the WAVE file header  */
-	writeWaveFileHeader(input->channels, numSamples, input->bitsPerSample,
-		input->sampleRate, outputFileStream);
+	
+	writeWaveFileHeader(input->channels, numSamples, input->bitsPerSample, input->sampleRate, outputFileStream);
 
 	for (i = 0; i < numSamples; i++)
 		fwriteShortLSB(rint(outputSignal[i]*32767*0.9), outputFileStream);
@@ -82,6 +79,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 
 }
+//taken from the testtone.c file given to us
 
 void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample,
 	double outputRate, FILE *outputFile)
@@ -154,7 +152,7 @@ void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample,
 *       functions:      fwrite
 *
 ******************************************************************************/
-
+//taken from the testtone.c file given to us
 size_t fwriteIntLSB(int data, FILE *stream)
 {
 	unsigned char array[4];
@@ -181,7 +179,7 @@ size_t fwriteIntLSB(int data, FILE *stream)
 *       functions:      fwrite
 *
 ******************************************************************************/
-
+//taken from the testtone.c file given to us
 size_t fwriteShortLSB(short int data, FILE *stream)
 {
 	unsigned char array[2];
@@ -190,6 +188,7 @@ size_t fwriteShortLSB(short int data, FILE *stream)
 	array[0] = (unsigned char)(data & 0xFF);
 	return fwrite(array, sizeof(unsigned char), 2, stream);
 }
+//taken from the convolve.c file given to us
 void convolve(float x[], int N, float h[], int M, float y[], int P){
 	
 	int n, m;

@@ -6,8 +6,6 @@
 #include "SoundFile.h"
 using namespace std;
 
-#define PI					3.14159265358979
-#define TWO_PI     (2.0 * PI)
 #define SWAP(a,b)  tempr=(a);(a)=(b);(b)=tempr
 
 
@@ -93,54 +91,35 @@ int main(int argc, char *argv[]) {
 	for (i = 0; i < power; i += 2) {
 		complexY[i] = complexX[i] * complexH[i] - complexX[i + 1] * complexH[i + 1];
 		complexY[i + 1] = complexX[i + 1] * complexH[i] + complexX[i] * complexH[i + 1];
-		//cout << complexY[i] << "\n";
-		//cout << complexY[i+1] << "\n";
+		
 	}
 	four1(complexY - 1, power, -1);
-	/*  Calculate the number of sound samples to create,
-	rounding upwards if necessary  */
+
 	int numSamples = power;
 
 
-	/*  Open a binary output file stream for writing */
+
 	FILE *outputFileStream = fopen(outputFileName, "wb");
 
-	/*  Write the WAVE file header  */
-	writeWaveFileHeader(input->channels, numSamples, input->bitsPerSample,
-		input->sampleRate, outputFileStream);
-	double maxValInResult = -1.0;
-	for (i = 0; i < numSamples; i++)
-		if (complexY[i] > maxValInResult)
-			maxValInResult = complexY[i];
-	
-	
+
+	writeWaveFileHeader(input->channels, numSamples, input->bitsPerSample, input->sampleRate, outputFileStream);
+	//scale by the size of the number of samples	
 	for (i = 0; i < power; i += 2) {
 		complexY[i] /= (double)power;
 		complexY[i + 1] /= (double)power;
 	}
-	/*double maxValInInput = -1.0;
-	for (i = 0; i < numSamples; i++)
-		if (input->signal[i] > maxValInInput)
-			maxValInInput = input->signal[i];*/
-
-	/*for (i = 0; i < numSamples; i++)
-		fwriteShortLSB((short)(complexY[i] / maxValInResult * maxValInInput), outputFileStream);*/
-	//for (i = 0; i < numSamples; i++) {
-	//	//cout << rint((short)complexY[i] * 32767 * 0.9);
-	//	fwriteShortLSB(rint((short)complexY[i] * 32767), outputFileStream);
-	//}
-
-	for (i = 0; i < numSamples; i++)
-		//cout << (short)complexY[i] << "\n";
+	
+	for (i = 0; i < numSamples; i++) {
 		fwriteShortLSB(rint((short)(complexY[i] * 32767)), outputFileStream);
-	// Close the output file stream  
+	}
+
+
 	fclose(outputFileStream);
-
-
+	
 	return 0;
 
 }
-
+//taken from the testtone.c file given to us
 void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample,
 	double outputRate, FILE *outputFile)
 {
@@ -212,7 +191,7 @@ void writeWaveFileHeader(int channels, int numberSamples, int bitsPerSample,
 *       functions:      fwrite
 *
 ******************************************************************************/
-
+//taken from the testtone.c file given to us
 size_t fwriteIntLSB(int data, FILE *stream)
 {
 	unsigned char array[4];
@@ -239,7 +218,7 @@ size_t fwriteIntLSB(int data, FILE *stream)
 *       functions:      fwrite
 *
 ******************************************************************************/
-
+//taken from the testtone.c file given to us
 size_t fwriteShortLSB(short int data, FILE *stream)
 {
 	unsigned char array[2];
@@ -258,6 +237,8 @@ size_t fwriteShortLSB(short int data, FILE *stream)
 //  nn*2. This code assumes the array starts
 //  at index 1, not 0, so subtract 1 when
 //  calling the routine
+
+//taken from the test.c file given to us
 
 void four1(double data[], int nn, int isign)
 {
